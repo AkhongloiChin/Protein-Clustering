@@ -12,8 +12,7 @@ db.sqlite3
 # Ignore migrations
 */migrations/
 
-# Ignore virtual environment
-venv/
-
 *.fasta
 fasta_files/*.fasta
+
+env/
