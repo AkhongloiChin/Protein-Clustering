@@ -16,3 +16,4 @@ db.sqlite3
 venv/
 
 *.fasta
+fasta_files/*.fasta
