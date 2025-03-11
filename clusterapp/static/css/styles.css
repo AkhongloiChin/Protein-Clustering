@@ -1,0 +1,79 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+/* Navigation Bar */
+.navbar {
+    margin-bottom: 20px;
+}
+
+/* Upload Form */
+.upload-form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.upload-form h1 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #007bff;
+}
+
+/* Results Page */
+.results-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.results-container h1 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #007bff;
+}
+
+.cluster {
+    margin-bottom: 20px;
+}
+
+.cluster h2 {
+    font-size: 20px;
+    color: #28a745;
+    margin-bottom: 10px;
+}
+
+.cluster ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.cluster ul li {
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+/* Footer */
+footer {
+    margin-top: 40px;
+    padding: 20px 0;
+    background-color: #343a40;
+    color: #fff;
+    text-align: center;
+}

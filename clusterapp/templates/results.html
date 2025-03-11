@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="results-container">
+    <h1>Clustering Results</h1>
+    <p>Number of clusters determined: {{ n_clusters }}</p>
+
+    {% for cluster_id, headers in clusters.items %}
+        <div class="cluster">
+            <h2>Cluster {{ cluster_id }}</h2>
+            <ul>
+                {% for header in headers %}
+                    <li>{{ header }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endfor %}
+
+    <h2>Cluster Visualization</h2>
+    <img src="data:image/png;base64,{{ cluster_plot }}" alt="Cluster Visualization" class="img-fluid">
+</div>
+{% endblock %}
