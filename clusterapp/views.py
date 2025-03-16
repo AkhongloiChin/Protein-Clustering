@@ -108,4 +108,3 @@ class ClusterResultsView(DetailView):
         context['cluster_plot'] = cluster_plot
         return context
         
-

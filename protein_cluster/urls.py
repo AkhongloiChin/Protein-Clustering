@@ -20,7 +20,7 @@ from clusterapp import views
 from django.views.generic import RedirectView
 
 urlpatterns = [
-    path('', RedirectView.as_view(url='/upload/')),  # Add this line
+    path('', RedirectView.as_view(url='/upload/')),  
     path('upload/', views.upload_fasta, name='upload'),
     path('results/<int:pk>/', views.ClusterResultsView.as_view(), name='cluster_results'),
 ]
