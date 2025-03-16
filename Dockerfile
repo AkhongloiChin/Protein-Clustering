@@ -29,12 +29,18 @@ COPY . .
 # Set the correct ownership after copying
 RUN chown -R appuser:appgroup /app
 
+# Copy entrypoint script and set executable permissions
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Switch to non-root user
 USER appuser
 
 # Expose the application's port
 EXPOSE 8000
 
-# Run 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Set entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
 
+# Default command
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
