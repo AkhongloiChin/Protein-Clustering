@@ -5,13 +5,12 @@ from .forms import FastaUploadForm
 from .models import FastaFile
 from django.views.generic import DetailView
 import numpy as np
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, AgglomerativeClustering
 from itertools import product
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 import base64
 from io import BytesIO
-
 
 def parse_fasta(content):
     sequences = []
@@ -27,7 +26,7 @@ def parse_fasta(content):
             current_header = line[1:]
             current_seq = []
         else:
-            current_seq.append(line)
+            current_seq.append(line) 
     if current_header is not None:
         headers.append(current_header)
         sequences.append(''.join(current_seq))
@@ -49,13 +48,19 @@ def get_kmer_counts(sequence, k=2):
 
 def upload_fasta(request):
     if request.method == 'POST':
+        print("Received POST request")  
         form = FastaUploadForm(request.POST, request.FILES)
         if form.is_valid():
+            print("Form is valid, saving...")
             fasta = form.save()
+            print(f"Saved file: {fasta.file.name}")
             return redirect('cluster_results', pk=fasta.pk)
+        else:
+            print("Form is invalid:", form.errors) 
     else:
         form = FastaUploadForm()
     return render(request, 'upload.html', {'form': form})
+
 
 class ClusterResultsView(DetailView):
     model = FastaFile
@@ -63,22 +68,33 @@ class ClusterResultsView(DetailView):
     context_object_name = 'fasta'
 
     def get_context_data(self, **kwargs):
+        print("got it")
         context = super().get_context_data(**kwargs)
         fasta = self.object
-        
+
         # Read and parse FASTA file
-        content = fasta.file.read().decode('utf-8')
+        with fasta.file.open() as f:
+            content = f.read().decode('utf-8')
+
         sequences = parse_fasta(content)
-        
-        # Feature extraction
         k = 2  # Using 2-mers
-        features = [get_kmer_counts(seq, k) for header, seq in sequences]
+        features = [get_kmer_counts(seq, k) for _, seq in sequences]
         X = np.array(features)
-        
-        n_clusters = fasta.num_clusters  
-        kmeans = KMeans(n_clusters=n_clusters)
-        labels = kmeans.fit_predict(X)
-        
+
+        if X.shape[0] == 0:
+            context['error'] = "No valid sequences found."
+            return context
+
+        # Choose clustering model based on user selection
+        if fasta.model_choice == 'kmeans':
+            n_clusters = 3  # Can be dynamic
+            model = KMeans(n_clusters=n_clusters)
+        elif fasta.model_choice == 'hierarchical':
+            n_clusters = 3
+            model = AgglomerativeClustering(n_clusters=3)
+        else:
+            context['error'] = "Invalid clustering method."
+        labels = model.fit_predict(X)
         clusters = {}
         for i, (header, _) in enumerate(sequences):
             cluster_id = labels[i]
