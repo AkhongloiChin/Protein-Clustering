@@ -72,6 +72,32 @@ body {
     font-weight: 600;
 }
 
+/* Cluster Scroll */
+.cluster-scroll {
+    max-height: 400px; /* Chiều cao tối đa của mỗi cluster */
+    overflow-y: auto; /* Thêm thanh cuộn dọc nếu nội dung vượt quá */
+    padding-right: 0.5rem; /* Khoảng cách để thanh cuộn không che nội dung */
+}
+
+/* Custom Scrollbar */
+.cluster-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.cluster-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.cluster-scroll::-webkit-scrollbar-thumb {
+    background: #007bff;
+    border-radius: 10px;
+}
+
+.cluster-scroll::-webkit-scrollbar-thumb:hover {
+    background: #0056b3;
+}
+
 /* List Group */
 .list-group-item {
     border: none;
@@ -173,5 +199,9 @@ footer p {
 
     .upload-container {
         padding: 1rem 0;
+    }
+
+    .cluster-scroll {
+        max-height: 300px; /* Giảm chiều cao trên màn hình nhỏ */
     }
 }

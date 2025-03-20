@@ -11,16 +11,23 @@
                 <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card shadow-sm h-100">
                         <div class="card-header bg-success text-white">
-                            <h2 class="h5 mb-0">Cluster {{ cluster_id }}</h2>
+                            <h2 class="h5 mb-0">Cluster {{ cluster_id }} ({{ headers|length }} proteins)</h2>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body cluster-scroll">
                             <ul class="list-group list-group-flush">
-                                {% for header in headers %}
+                                {% for header in headers|slice:":20" %}
                                     <li class="list-group-item d-flex align-items-center">
                                         <span class="badge bg-primary me-2">{{ forloop.counter }}</span>
                                         {{ header }}
                                     </li>
+                                {% empty %}
+                                    <li class="list-group-item text-muted">No proteins in this cluster.</li>
                                 {% endfor %}
+                                {% if headers|length > 20 %}
+                                    <li class="list-group-item text-center text-muted">
+                                        <small>(Showing first 20 of {{ headers|length }} proteins)</small>
+                                    </li>
+                                {% endif %}
                             </ul>
                         </div>
                     </div>
