@@ -79,9 +79,7 @@ class ClusterResultsView(DetailView):
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(winsorized_X)  
 
-        #umap_model = umap.UMAP(n_components=50, random_state=42)
-        #X_umap = umap_model.fit_transform(X_scaled)
-        pca = PCA(n_components=50)
+        pca = PCA(n_components=3)
         X_pca = pca.fit_transform(X_scaled)
 
         if fasta.model_choice == 'kmeans':
@@ -105,9 +103,7 @@ class ClusterResultsView(DetailView):
         plt.figure(figsize=(8, 6))
         for cluster_id in range(n_clusters):
             plt.scatter(X_pca[labels == cluster_id, 0], X_pca[labels == cluster_id, 1], label=f'Cluster {cluster_id}')
-        plt.title('Protein Clusters (2D PCA)')
-        plt.xlabel('PCA Component 1')
-        plt.ylabel('PCA Component 2')
+        plt.title('Protein Clusters')
         plt.legend()
 
         buffer = BytesIO()
