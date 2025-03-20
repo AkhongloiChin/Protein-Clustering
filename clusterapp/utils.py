@@ -4,7 +4,7 @@ from itertools import product
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 import base64
-from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
 import scipy.cluster.hierarchy as sch
 
 from io import BytesIO
@@ -69,10 +69,14 @@ def kmeans_clustering(X_pca, labels, sequences, n_clusters=3):
         cluster_id = labels[i]
         clusters.setdefault(cluster_id, []).append(header)
     sorted_clusters = dict(sorted(clusters.items()))
+
     # Scatter plot
     plt.figure(figsize=(8, 6))
-    for cluster_id in range(n_clusters):
+    
+    unique_clusters = np.unique(labels)  # Get actual unique cluster IDs
+    for cluster_id in unique_clusters:
         plt.scatter(X_pca[labels == cluster_id, 0], X_pca[labels == cluster_id, 1], label=f'Cluster {cluster_id}')
+    
     plt.title('K-Means Protein Clusters')
     plt.legend()
 
@@ -86,23 +90,32 @@ def kmeans_clustering(X_pca, labels, sequences, n_clusters=3):
     return sorted_clusters, cluster_plot
 
 def hierarchical_clustering(X_pca, labels, sequences, linkage_method='ward'):
-    """Performs Hierarchical clustering and generates a dendrogram."""
+    """Performs Hierarchical clustering and generates a clean dendrogram with given labels."""
     clusters = {}
     for i, (header, _) in enumerate(sequences):
         cluster_id = labels[i]
         clusters.setdefault(cluster_id, []).append(header)
     sorted_clusters = dict(sorted(clusters.items()))
-    # Generate dendrogram
-    plt.figure(figsize=(10, 6))
+    # Compute the linkage matrix
     Z = linkage(X_pca, method=linkage_method)
-    dendrogram(Z, labels=[header for header, _ in sequences], leaf_rotation=90, leaf_font_size=10)
+
+    # Create a mapping from numeric index to label
+    label_mapping = {i: header for i, (header, _) in enumerate(sequences)}
+    label_list = [label_mapping[i] for i in range(len(sequences))]
+
+    # Generate dendrogram
+    plt.figure(figsize=(12, 6))
+    dendrogram(Z, labels=label_list, leaf_rotation=90, leaf_font_size=8, color_threshold=Z[-5, 2])  # Adjust colors dynamically
+    
     plt.title(f'Hierarchical Clustering Dendrogram ({linkage_method} linkage)')
+    plt.xlabel('Samples')
+    plt.ylabel('Distance')
 
     # Save and encode the dendrogram
     buffer = BytesIO()
-    plt.savefig(buffer, format='png')
+    plt.savefig(buffer, format='png', bbox_inches='tight')
     buffer.seek(0)
     dendrogram_plot = base64.b64encode(buffer.getvalue()).decode('utf-8')
     plt.close()
 
-    return sorted_clusters, dendrogram_plot
+    return sorted_clusters,dendrogram_plot

@@ -16,6 +16,8 @@ from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
+from django.apps import apps
+from django.http import JsonResponse
 from .utils import get_optimal_k, get_kmer_counts, hierarchical_clustering, kmeans_clustering
 import numpy as np
 
@@ -83,9 +85,12 @@ class ClusterResultsView(DetailView):
         pca = PCA(n_components=3)
         X_pca = pca.fit_transform(X_scaled)
 
+        cluster_app = apps.get_app_config('clusterapp')
+
         if fasta.model_choice == 'kmeans':
             n_clusters = get_optimal_k(X_pca, is_Kmeans = True)
-            model = KMeans(n_clusters=n_clusters)
+            #model = KMeans(n_clusters=n_clusters)
+            model = cluster_app.cluster_models['kmeans']
             labels = model.fit_predict(X_pca)
             context['clusters'], context['cluster_plot'] = kmeans_clustering(X_pca, labels, sequences, n_clusters=3)
 
@@ -97,7 +102,9 @@ class ClusterResultsView(DetailView):
                 labels -= labels.min() 
                 context['clusters'], context['cluster_plot'] = hierarchical_clustering(X_pca, labels, sequences, linkage_method= "centroid")
             else:
-                model = AgglomerativeClustering(n_clusters=n_clusters, linkage=fasta.linkage)
+                linkage_name = "hier_" + fasta.linkage
+                #model = AgglomerativeClustering(n_clusters=n_clusters, linkage=fasta.linkage)
+                model = cluster_app.cluster_models[linkage_name]
                 labels = model.fit_predict(X_pca)
                 context['clusters'], context['cluster_plot'] = hierarchical_clustering(X_pca, labels, sequences, linkage_method= fasta.linkage)
         else:
