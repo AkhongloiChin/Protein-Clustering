@@ -26,7 +26,7 @@ def get_kmer_counts(sequence, k=2):
         return [0.0] * len(possible_kmers)
     return [kmer_counts[kmer] / total for kmer in possible_kmers]
 
-def get_optimal_k(X, is_Kmeans : bool):
+def get_optimal_k(X, is_Kmeans : bool, linkage = None):
     '''
     is_Kmeans == True : K-means
     is_Kmeans == False : hierarchical
@@ -40,7 +40,7 @@ def get_optimal_k(X, is_Kmeans : bool):
         if is_Kmeans :
             model = KMeans(n_clusters=k, random_state=42)
         else :
-            model = AgglomerativeClustering(n_clusters = k)   
+            model = AgglomerativeClustering(n_clusters = k, linkage = linkage)   
         model.fit_predict(X)
         # Compute Silhouette Score
         labels = model.labels_

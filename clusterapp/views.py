@@ -87,7 +87,7 @@ class ClusterResultsView(DetailView):
             model = KMeans(n_clusters=n_clusters)
 
         elif fasta.model_choice == 'hierarchical' :
-            n_clusters = get_optimal_k(X_pca, is_Kmeans= False)
+            n_clusters = get_optimal_k(X_pca, is_Kmeans= False, linkage = fasta.linkage)
             model = AgglomerativeClustering(n_clusters=n_clusters, linkage= fasta.linkage)
 
         else:
