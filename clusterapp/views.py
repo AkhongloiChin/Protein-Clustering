@@ -15,6 +15,7 @@ from scipy.stats.mstats import winsorize
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
 
 from django.apps import apps
 from django.http import JsonResponse
@@ -89,10 +90,12 @@ class ClusterResultsView(DetailView):
 
         if fasta.model_choice == 'kmeans':
             n_clusters = get_optimal_k(X_pca, is_Kmeans = True)
-            model = KMeans(n_clusters=n_clusters)
-            #model = cluster_app.cluster_models['kmeans']
+            model_name = 'kmeans_'+str(n_clusters)
+            #model = KMeans(n_clusters=n_clusters)
+            model = cluster_app.cluster_models[model_name]
             labels = model.fit_predict(X_pca)
-            context['clusters'], context['cluster_plot'] = kmeans_clustering(X_pca, labels, sequences, n_clusters=3)
+            context['clusters'], context['cluster_plot'] = kmeans_clustering(X_pca, labels, sequences, n_clusters)
+            context['dendrogram_plot'] = None
 
         elif fasta.model_choice == 'hierarchical':
             n_clusters = get_optimal_k(X_pca, is_Kmeans=False, linkage=fasta.linkage)
@@ -100,13 +103,20 @@ class ClusterResultsView(DetailView):
                 linkage_matrix = sch.linkage(X_pca, method="centroid")
                 labels = sch.fcluster(linkage_matrix, t=n_clusters, criterion="maxclust")
                 labels -= labels.min() 
-                context['clusters'], context['cluster_plot'] = hierarchical_clustering(X_pca, labels, sequences, linkage_method= "centroid", num_clusters = n_clusters)
+                _ , context['dendrogram_plot'] = hierarchical_clustering(X_pca, labels, sequences, linkage_method= "centroid", n_clusters = n_clusters)
+                context['clusters'], context['cluster_plot'] = kmeans_clustering(X_pca, labels,sequences,n_clusters)
             else:
-                linkage_name = "hier_" + fasta.linkage
-                model = AgglomerativeClustering(n_clusters=n_clusters, linkage=fasta.linkage)
-                #model = cluster_app.cluster_models[linkage_name]
+                linkage_name = "hier_" + fasta.linkage + '_' + str(n_clusters)
+                #model = AgglomerativeClustering(n_clusters=n_clusters, linkage=fasta.linkage)
+                model = cluster_app.cluster_models[linkage_name]
                 labels = model.fit_predict(X_pca)
-                context['clusters'], context['cluster_plot'] = hierarchical_clustering(X_pca, labels, sequences, linkage_method= fasta.linkage, num_clusters = n_clusters)
+                context['clusters'], context['cluster_plot'] = kmeans_clustering(X_pca, labels, sequences, n_clusters = n_clusters)
+                _ , context['dendrogram_plot'] = hierarchical_clustering(X_pca, labels, sequences, linkage_method= fasta.linkage, n_clusters = n_clusters)
         else:
             context['error'] = "Invalid clustering method."
+        if len(set(labels)) > 1:  # Kiểm tra nếu có hơn 1 cluster
+            silhouette_avg = silhouette_score(X_pca, labels)
+        else:
+            silhouette_avg = None  # Tránh lỗi khi chỉ có 1 cụm
+        context['silhouette_score'] = silhouette_avg
         return context

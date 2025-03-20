@@ -88,8 +88,8 @@ def kmeans_clustering(X_pca, labels, sequences, n_clusters=3):
     plt.close()
 
     return sorted_clusters, cluster_plot
-
-def hierarchical_clustering(X_pca, labels, sequences, linkage_method='ward', num_clusters=None):
+    
+def hierarchical_clustering(X_pca, labels, sequences, linkage_method='ward', n_clusters=None):
     """Performs Hierarchical clustering and generates a dendrogram with cluster colors."""
     clusters = {}
     for i, (header, _) in enumerate(sequences):
@@ -100,11 +100,11 @@ def hierarchical_clustering(X_pca, labels, sequences, linkage_method='ward', num
     Z = linkage(X_pca, method=linkage_method)
 
     # Define number of clusters dynamically if not provided
-    if num_clusters is None:
-        num_clusters = max(labels) + 1  # Assuming `labels` start from 0
+    if n_clusters is None:
+        n_clusters = max(labels) + 1  # Assuming `labels` start from 0
 
     # Use fcluster to determine cluster assignments
-    cluster_assignments = fcluster(Z, num_clusters, criterion='maxclust')
+    cluster_assignments = fcluster(Z, n_clusters, criterion='maxclust')
 
     # Generate a color mapping for clusters
     unique_clusters = np.unique(cluster_assignments)
@@ -118,7 +118,7 @@ def hierarchical_clustering(X_pca, labels, sequences, linkage_method='ward', num
     plt.figure(figsize=(12, 6))
     dendrogram(
         Z, labels=label_list, leaf_rotation=90, leaf_font_size=8,
-        color_threshold=Z[-(num_clusters - 1), 2],  # Auto-select color threshold
+        color_threshold=Z[-(n_clusters - 1), 2],  # Auto-select color threshold
         above_threshold_color='black'  # Unclustered parts remain black
     )
 
