@@ -4,3 +4,5 @@ Django==5.1.7
 matplotlib==3.10.1
 numpy==2.2.3
 scikit_learn==1.6.1
+scipy==1.15.2
+#umap_learn==0.5.7

@@ -1,16 +1,20 @@
+from io import BytesIO
+import base64
 import matplotlib
 matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
 from django.shortcuts import render, redirect
+from django.views.generic import DetailView
 from .forms import FastaUploadForm
 from .models import FastaFile
-from django.views.generic import DetailView
-import numpy as np
+
 from sklearn.cluster import KMeans, AgglomerativeClustering
-from itertools import product
-import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
-import base64
-from io import BytesIO
+from sklearn.preprocessing import StandardScaler
+from scipy.stats.mstats import winsorize
+from .utils import get_optimal_k, get_kmer_counts
+import numpy as np
 
 def parse_fasta(content):
     sequences = []
@@ -31,20 +35,6 @@ def parse_fasta(content):
         headers.append(current_header)
         sequences.append(''.join(current_seq))
     return list(zip(headers, sequences))
-
-def get_kmer_counts(sequence, k=2):
-    amino_acids = 'ACDEFGHIKLMNPQRSTVWY'
-    possible_kmers = [''.join(p) for p in product(amino_acids, repeat=k)]
-    kmer_counts = {kmer: 0 for kmer in possible_kmers}
-    total = 0
-    for i in range(len(sequence) - k + 1):
-        kmer = sequence[i:i+k]
-        if kmer in kmer_counts:
-            kmer_counts[kmer] += 1
-            total += 1
-    if total == 0:
-        return [0.0] * len(possible_kmers)
-    return [kmer_counts[kmer] / total for kmer in possible_kmers]
 
 def upload_fasta(request):
     if request.method == 'POST':
@@ -77,33 +67,40 @@ class ClusterResultsView(DetailView):
             content = f.read().decode('utf-8')
 
         sequences = parse_fasta(content)
+        
+        ########################
         k = 2  # Using 2-mers
-        features = [get_kmer_counts(seq, k) for _, seq in sequences]
+        features = [get_kmer_counts(seq) for _, seq in sequences]
         X = np.array(features)
-
         if X.shape[0] == 0:
             context['error'] = "No valid sequences found."
             return context
+        winsorized_X = winsorize(X, limits=[0.05, 0.05])
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(winsorized_X)  
 
-        # Choose clustering model based on user selection
+        #umap_model = umap.UMAP(n_components=50, random_state=42)
+        #X_umap = umap_model.fit_transform(X_scaled)
+        pca = PCA(n_components=50)
+        X_pca = pca.fit_transform(X_scaled)
+
         if fasta.model_choice == 'kmeans':
-            n_clusters = 3  # Can be dynamic
+            n_clusters = get_optimal_k(X_pca, is_Kmeans = True)
             model = KMeans(n_clusters=n_clusters)
+
         elif fasta.model_choice == 'hierarchical':
-            n_clusters = 3
+            n_clusters = get_optimal_k(X_pca, is_Kmeans= False)
             model = AgglomerativeClustering(n_clusters=3)
+
         else:
             context['error'] = "Invalid clustering method."
-        labels = model.fit_predict(X)
+        labels = model.fit_predict(X_pca)
         clusters = {}
         for i, (header, _) in enumerate(sequences):
             cluster_id = labels[i]
             if cluster_id not in clusters:
                 clusters[cluster_id] = []
             clusters[cluster_id].append(header)
-        
-        pca = PCA(n_components=2)
-        X_pca = pca.fit_transform(X)
         
         plt.figure(figsize=(8, 6))
         for cluster_id in range(n_clusters):
@@ -120,7 +117,5 @@ class ClusterResultsView(DetailView):
         plt.close()
         
         context['clusters'] = clusters
-        context['n_clusters'] = n_clusters
         context['cluster_plot'] = cluster_plot
         return context
-        
