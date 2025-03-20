@@ -9,10 +9,13 @@ from django.views.generic import DetailView
 from .forms import FastaUploadForm
 from .models import FastaFile
 
+import scipy.cluster.hierarchy as sch
+from scipy.stats.mstats import winsorize
+
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from scipy.stats.mstats import winsorize
+
 from .utils import get_optimal_k, get_kmer_counts
 import numpy as np
 
@@ -85,14 +88,19 @@ class ClusterResultsView(DetailView):
         if fasta.model_choice == 'kmeans':
             n_clusters = get_optimal_k(X_pca, is_Kmeans = True)
             model = KMeans(n_clusters=n_clusters)
+            labels = model.fit_predict(X_pca)
 
-        elif fasta.model_choice == 'hierarchical' :
-            n_clusters = get_optimal_k(X_pca, is_Kmeans= False, linkage = fasta.linkage)
-            model = AgglomerativeClustering(n_clusters=n_clusters, linkage= fasta.linkage)
-
+        elif fasta.model_choice == 'hierarchical':
+            n_clusters = get_optimal_k(X_pca, is_Kmeans=False, linkage=fasta.linkage)
+            if fasta.linkage == "centroid":
+                linkage_matrix = sch.linkage(X_pca, method="centroid")
+                labels = sch.fcluster(linkage_matrix, t=n_clusters, criterion="maxclust")
+                labels -= labels.min() 
+            else:
+                model = AgglomerativeClustering(n_clusters=n_clusters, linkage=fasta.linkage)
+                labels = model.fit_predict(X_pca)
         else:
             context['error'] = "Invalid clustering method."
-        labels = model.fit_predict(X_pca)
 
         clusters = {}
         for i, (header, _) in enumerate(sequences):
@@ -112,7 +120,7 @@ class ClusterResultsView(DetailView):
         buffer.seek(0)
         cluster_plot = base64.b64encode(buffer.getvalue()).decode('utf-8')
         plt.close()
-        
-        context['clusters'] = clusters
+        sorted_clusters = dict(sorted(clusters.items()))
+        context['clusters'] = sorted_clusters
         context['cluster_plot'] = cluster_plot
         return context
