@@ -32,8 +32,6 @@ def get_optimal_k(X, is_Kmeans : bool):
     is_Kmeans == False : hierarchical
     ''' 
     k_values = range(2, 11)
-    # Store WCSS and Silhouette Scores
-    wcss = []
     silhouette_scores = []
 
     # Compute WCSS and Silhouette Score for each k

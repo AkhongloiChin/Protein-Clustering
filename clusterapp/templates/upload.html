@@ -25,9 +25,23 @@
                     <!-- Upload Form -->
                     <form method="post" enctype="multipart/form-data" id="uploadForm">
                         {% csrf_token %}
+                        
                         <div class="mb-3">
-                            {{ form.as_p }}
+                            {{ form.file.label_tag }}  
+                            {{ form.file }}
                         </div>
+
+                        <div class="mb-3">
+                            {{ form.model_choice.label_tag }}
+                            {{ form.model_choice }}
+                        </div>
+
+                        <!-- Linkage Selection (Hidden by Default) -->
+                        <div class="mb-3" id="linkageField" style="display:none;">
+                            <label for="id_linkage">Linkage Method:</label>
+                            {{ form.linkage }}
+                        </div>
+
                         <button type="submit" class="btn btn-primary w-100" id="uploadButton">
                             <span class="button-text"><i class="fas fa-cloud-upload-alt me-2"></i>Upload and Cluster</span>
                             <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="loadingSpinner"></span>
@@ -39,8 +53,17 @@
     </div>
 </div>
 
-<!-- JavaScript for loading effect -->
+<!-- JavaScript for UI Interactivity -->
 <script>
+    function toggleLinkage() {
+        var modelChoice = document.getElementById("id_model_choice").value;
+        var linkageField = document.getElementById("linkageField");
+        linkageField.style.display = (modelChoice === "hierarchical") ? "block" : "none";
+    }
+
+    document.getElementById("id_model_choice").addEventListener("change", toggleLinkage);
+    toggleLinkage();  // Gọi ngay khi trang load
+
     document.getElementById('uploadForm').addEventListener('submit', function() {
         // Disable button and show spinner
         const button = document.getElementById('uploadButton');

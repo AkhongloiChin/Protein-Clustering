@@ -10,3 +10,16 @@ class FastaFile(models.Model):
         ],
         default='kmeans'
     )
+    
+    linkage = models.CharField(
+        max_length=20,
+        choices=[
+            ('single', 'Single Linkage'),
+            ('complete', 'Complete Linkage'),
+            ('average', 'Average Linkage'),
+            ('centroid', 'Centroid Linkage')
+        ],
+        default = 'ward',
+        blank=True,  # Cho phép trống nếu chọn K-Means
+        null=True
+    )

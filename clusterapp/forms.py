@@ -12,11 +12,21 @@ class FastaUploadForm(forms.ModelForm):
         required=True
     )
 
+    linkage = forms.ChoiceField(
+        choices=[
+            ('single', 'Single Linkage'),
+            ('complete', 'Complete Linkage'),
+            ('average', 'Average Linkage'),
+            ('centroid', 'Centroid Linkage')
+        ],
+        required=False  # Chỉ yêu cầu khi chọn hierarchical
+    )
+
     def clean_file(self):
         file = self.cleaned_data.get('file')
 
         if file:
-            ext = os.path.splitext(file.name)[1].lower()  # Get file extension
+            ext = os.path.splitext(file.name)[1].lower()
             allowed_extensions = ['.fasta', '.fa']
 
             if ext not in allowed_extensions:

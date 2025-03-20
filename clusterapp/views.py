@@ -86,13 +86,14 @@ class ClusterResultsView(DetailView):
             n_clusters = get_optimal_k(X_pca, is_Kmeans = True)
             model = KMeans(n_clusters=n_clusters)
 
-        elif fasta.model_choice == 'hierarchical':
+        elif fasta.model_choice == 'hierarchical' :
             n_clusters = get_optimal_k(X_pca, is_Kmeans= False)
-            model = AgglomerativeClustering(n_clusters=3)
+            model = AgglomerativeClustering(n_clusters=n_clusters, linkage= fasta.linkage)
 
         else:
             context['error'] = "Invalid clustering method."
         labels = model.fit_predict(X_pca)
+
         clusters = {}
         for i, (header, _) in enumerate(sequences):
             cluster_id = labels[i]
