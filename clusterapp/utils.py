@@ -63,16 +63,12 @@ def get_optimal_k(X, is_Kmeans : bool, linkage = None):
     optimal_k = k_values[np.argmax(silhouette_scores)]
     return optimal_k
 
-def kmeans_clustering(X_pca, sequences, n_clusters=3):
-    """Performs K-Means clustering and generates a scatter plot."""
-    model = KMeans(n_clusters=n_clusters, random_state=42)
-    labels = model.fit_predict(X_pca)
-
+def kmeans_clustering(X_pca, labels, sequences, n_clusters=3):
     clusters = {}
     for i, (header, _) in enumerate(sequences):
         cluster_id = labels[i]
         clusters.setdefault(cluster_id, []).append(header)
-
+    sorted_clusters = dict(sorted(clusters.items()))
     # Scatter plot
     plt.figure(figsize=(8, 6))
     for cluster_id in range(n_clusters):
@@ -87,18 +83,15 @@ def kmeans_clustering(X_pca, sequences, n_clusters=3):
     cluster_plot = base64.b64encode(buffer.getvalue()).decode('utf-8')
     plt.close()
 
-    return clusters, cluster_plot
+    return sorted_clusters, cluster_plot
 
-def hierarchical_clustering(X_pca, sequences, linkage_method='ward', n_clusters=3):
+def hierarchical_clustering(X_pca, labels, sequences, linkage_method='ward'):
     """Performs Hierarchical clustering and generates a dendrogram."""
-    model = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage_method)
-    labels = model.fit_predict(X_pca)
-
     clusters = {}
     for i, (header, _) in enumerate(sequences):
         cluster_id = labels[i]
         clusters.setdefault(cluster_id, []).append(header)
-
+    sorted_clusters = dict(sorted(clusters.items()))
     # Generate dendrogram
     plt.figure(figsize=(10, 6))
     Z = linkage(X_pca, method=linkage_method)
@@ -112,4 +105,4 @@ def hierarchical_clustering(X_pca, sequences, linkage_method='ward', n_clusters=
     dendrogram_plot = base64.b64encode(buffer.getvalue()).decode('utf-8')
     plt.close()
 
-    return clusters, dendrogram_plot
+    return sorted_clusters, dendrogram_plot

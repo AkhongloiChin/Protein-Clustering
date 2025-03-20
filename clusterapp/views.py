@@ -16,7 +16,7 @@ from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
-from .utils import get_optimal_k, get_kmer_counts
+from .utils import get_optimal_k, get_kmer_counts, hierarchical_clustering, kmeans_clustering
 import numpy as np
 
 def parse_fasta(content):
@@ -68,10 +68,8 @@ class ClusterResultsView(DetailView):
         # Read and parse FASTA file
         with fasta.file.open() as f:
             content = f.read().decode('utf-8')
-
         sequences = parse_fasta(content)
-        
-        ########################
+
         k = 2  # Using 2-mers
         features = [get_kmer_counts(seq) for _, seq in sequences]
         X = np.array(features)
@@ -89,6 +87,7 @@ class ClusterResultsView(DetailView):
             n_clusters = get_optimal_k(X_pca, is_Kmeans = True)
             model = KMeans(n_clusters=n_clusters)
             labels = model.fit_predict(X_pca)
+            context['clusters'], context['cluster_plot'] = kmeans_clustering(X_pca, labels, sequences, n_clusters=3)
 
         elif fasta.model_choice == 'hierarchical':
             n_clusters = get_optimal_k(X_pca, is_Kmeans=False, linkage=fasta.linkage)
@@ -96,31 +95,11 @@ class ClusterResultsView(DetailView):
                 linkage_matrix = sch.linkage(X_pca, method="centroid")
                 labels = sch.fcluster(linkage_matrix, t=n_clusters, criterion="maxclust")
                 labels -= labels.min() 
+                context['clusters'], context['cluster_plot'] = hierarchical_clustering(X_pca, labels, sequences, linkage_method= "centroid")
             else:
                 model = AgglomerativeClustering(n_clusters=n_clusters, linkage=fasta.linkage)
                 labels = model.fit_predict(X_pca)
+                context['clusters'], context['cluster_plot'] = hierarchical_clustering(X_pca, labels, sequences, linkage_method= fasta.linkage)
         else:
             context['error'] = "Invalid clustering method."
-
-        clusters = {}
-        for i, (header, _) in enumerate(sequences):
-            cluster_id = labels[i]
-            if cluster_id not in clusters:
-                clusters[cluster_id] = []
-            clusters[cluster_id].append(header)
-        
-        plt.figure(figsize=(8, 6))
-        for cluster_id in range(n_clusters):
-            plt.scatter(X_pca[labels == cluster_id, 0], X_pca[labels == cluster_id, 1], label=f'Cluster {cluster_id}')
-        plt.title('Protein Clusters')
-        plt.legend()
-
-        buffer = BytesIO()
-        plt.savefig(buffer, format='png')
-        buffer.seek(0)
-        cluster_plot = base64.b64encode(buffer.getvalue()).decode('utf-8')
-        plt.close()
-        sorted_clusters = dict(sorted(clusters.items()))
-        context['clusters'] = sorted_clusters
-        context['cluster_plot'] = cluster_plot
         return context
