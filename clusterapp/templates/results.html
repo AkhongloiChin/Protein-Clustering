@@ -13,8 +13,9 @@
                         <div class="card-header bg-success text-white">
                             <h2 class="h5 mb-0">Cluster {{ cluster_id }} ({{ headers|length }} proteins)</h2>
                         </div>
-                        <div class="card-body cluster-scroll">
-                            <ul class="list-group list-group-flush">
+                        <div class="card-body cluster-scroll" id="cluster-{{ cluster_id }}">
+                            <!-- Danh sách protein ban đầu (20 protein đầu tiên) -->
+                            <ul class="list-group list-group-flush cluster-initial" data-cluster-id="{{ cluster_id }}">
                                 {% for header in headers|slice:":20" %}
                                     <li class="list-group-item d-flex align-items-center">
                                         <span class="badge bg-primary me-2">{{ forloop.counter }}</span>
@@ -23,12 +24,22 @@
                                 {% empty %}
                                     <li class="list-group-item text-muted">No proteins in this cluster.</li>
                                 {% endfor %}
-                                {% if headers|length > 20 %}
-                                    <li class="list-group-item text-center text-muted">
-                                        <small>(Showing first 20 of {{ headers|length }} proteins)</small>
-                                    </li>
-                                {% endif %}
                             </ul>
+                            <!-- Danh sách đầy đủ protein (ẩn ban đầu) -->
+                            <ul class="list-group list-group-flush cluster-full d-none" data-cluster-id="{{ cluster_id }}">
+                                {% for header in headers %}
+                                    <li class="list-group-item d-flex align-items-center">
+                                        <span class="badge bg-primary me-2">{{ forloop.counter }}</span>
+                                        {{ header }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <!-- Nút Show More (hiển thị nếu cluster có nhiều hơn 20 protein) -->
+                            {% if headers|length > 20 %}
+                                <div class="text-center mt-2">
+                                    <button class="btn btn-outline-primary btn-sm show-more-btn" data-cluster-id="{{ cluster_id }}">Show More</button>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -52,4 +63,22 @@
         </div>
     </div>
 </div>
+
+<!-- JavaScript để xử lý nút Show More -->
+<script>
+    document.querySelectorAll('.show-more-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const clusterId = this.getAttribute('data-cluster-id');
+            const initialList = document.querySelector(`.cluster-initial[data-cluster-id="${clusterId}"]`);
+            const fullList = document.querySelector(`.cluster-full[data-cluster-id="${clusterId}"]`);
+            
+            // Ẩn danh sách ban đầu và hiển thị danh sách đầy đủ
+            initialList.classList.add('d-none');
+            fullList.classList.remove('d-none');
+            
+            // Ẩn nút Show More
+            this.style.display = 'none';
+        });
+    });
+</script>
 {% endblock %}
