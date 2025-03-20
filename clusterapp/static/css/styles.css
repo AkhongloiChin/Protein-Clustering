@@ -28,11 +28,13 @@ body {
 }
 
 /* Upload Container with Background */
+/* Upload Container with Background */
 .upload-container {
-    background-image: url('https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg?auto=compress&cs=tinysrgb&w=1920'); /* Hình nền nhẹ nhàng liên quan đến sinh học */
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    background-image: url('https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg?auto=compress&cs=tinysrgb&w=1920') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+    background-repeat: no-repeat !important;
     min-height: 100vh;
     padding: 2rem 0;
     position: relative;
@@ -45,7 +47,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.85); /* Lớp phủ trắng mờ để làm nổi bật nội dung */
+    background: rgba(255, 255, 255, 0.7); /* Giảm độ mờ để hình nền dễ nhìn hơn */
     z-index: 1;
 }
 
