@@ -127,8 +127,9 @@ def hierarchical_clustering(X_pca, labels, sequences, linkage_method='ward', num
     plt.ylabel('Distance')
     plt.xticks([]) 
     # Generate a legend for cluster colors
-    handles = [plt.Line2D([0], [0], color=color, lw=4) for color in cluster_color_map.values()]
-    plt.legend(handles, [f'Cluster {c-1}' for c in unique_clusters], title="Clusters", loc='upper right')
+    handles = [plt.Line2D([0], [0], color=cluster_color_map[c], lw=4) for c in unique_clusters]
+    plt.legend(handles, [f'Cluster {c}' for c in unique_clusters], title="Clusters", loc='upper right')
+
 
     # Save and encode the dendrogram
     buffer = BytesIO()
