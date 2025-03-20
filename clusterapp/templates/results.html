@@ -1,21 +1,48 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="results-container">
-    <h1>Clustering Results</h1>
+<div class="row">
+    <div class="col-12">
+        <h1 class="text-center mb-4 text-primary"><i class="fas fa-sitemap me-2"></i>Clustering Results</h1>
 
-    {% for cluster_id, headers in clusters.items %}
-        <div class="cluster">
-            <h2>Cluster {{ cluster_id }}</h2>
-            <ul>
-                {% for header in headers %}
-                    <li>{{ header }}</li>
-                {% endfor %}
-            </ul>
+        <!-- Display Clusters -->
+        <div class="row">
+            {% for cluster_id, headers in clusters.items %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-success text-white">
+                            <h2 class="h5 mb-0">Cluster {{ cluster_id }}</h2>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                {% for header in headers %}
+                                    <li class="list-group-item d-flex align-items-center">
+                                        <span class="badge bg-primary me-2">{{ forloop.counter }}</span>
+                                        {{ header }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-warning text-center" role="alert">
+                        No clusters found.
+                    </div>
+                </div>
+            {% endfor %}
         </div>
-    {% endfor %}
 
-    <h2>Cluster Visualization</h2>
-    <img src="data:image/png;base64,{{ cluster_plot }}" alt="Cluster Visualization" class="img-fluid">
+        <!-- Cluster Visualization -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-primary text-white">
+                <h2 class="h5 mb-0"><i class="fas fa-chart-scatter me-2"></i>Cluster Visualization</h2>
+            </div>
+            <div class="card-body text-center">
+                <img src="data:image/png;base64,{{ cluster_plot }}" alt="Cluster Visualization" class="img-fluid rounded" style="max-width: 100%; height: auto;">
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
