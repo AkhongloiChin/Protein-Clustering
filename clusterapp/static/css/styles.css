@@ -3,6 +3,7 @@ body {
     font-family: 'Roboto', sans-serif;
     background-color: #f4f7fa;
     color: #333;
+    margin: 0;
 }
 
 /* Navigation Bar */
@@ -26,10 +27,38 @@ body {
     color: #e0e0e0 !important;
 }
 
+/* Upload Container with Background */
+.upload-container {
+    background-image: url('https://www.transparenttextures.com/patterns/biology.png'); /* Hình nền nhẹ nhàng liên quan đến sinh học */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    min-height: 100vh;
+    padding: 2rem 0;
+    position: relative;
+}
+
+.upload-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.85); /* Lớp phủ trắng mờ để làm nổi bật nội dung */
+    z-index: 1;
+}
+
+.upload-container > * {
+    position: relative;
+    z-index: 2;
+}
+
 /* Cards */
 .card {
     border: none;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: #fff;
 }
 
 .card:hover {
@@ -67,6 +96,12 @@ body {
     transform: translateY(-2px);
 }
 
+.btn-primary:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    cursor: not-allowed;
+}
+
 /* Form */
 form p {
     margin-bottom: 1rem;
@@ -75,14 +110,30 @@ form p {
 form label {
     font-weight: 500;
     color: #555;
+    display: block;
+    margin-bottom: 0.5rem;
 }
 
 form input[type="file"],
 form select {
     width: 100%;
-    padding: 0.5rem;
+    padding: 0.75rem;
     border-radius: 5px;
     border: 1px solid #ced4da;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+form input[type="file"]:hover,
+form select:hover {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+form input[type="file"]:focus,
+form select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    outline: none;
 }
 
 /* Footer */
@@ -116,5 +167,9 @@ footer p {
     .card-header h1,
     .card-header h2 {
         font-size: 1.25rem;
+    }
+
+    .upload-container {
+        padding: 1rem 0;
     }
 }
