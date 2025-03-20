@@ -89,8 +89,8 @@ def kmeans_clustering(X_pca, labels, sequences, n_clusters=3):
 
     return sorted_clusters, cluster_plot
 
-def hierarchical_clustering(X_pca, labels, sequences, linkage_method='ward'):
-    """Performs Hierarchical clustering and generates a clean dendrogram with given labels."""
+def hierarchical_clustering(X_pca, labels, sequences, linkage_method='ward', num_clusters=None):
+    """Performs Hierarchical clustering and generates a dendrogram with cluster colors."""
     clusters = {}
     for i, (header, _) in enumerate(sequences):
         cluster_id = labels[i]
@@ -99,17 +99,36 @@ def hierarchical_clustering(X_pca, labels, sequences, linkage_method='ward'):
     # Compute the linkage matrix
     Z = linkage(X_pca, method=linkage_method)
 
+    # Define number of clusters dynamically if not provided
+    if num_clusters is None:
+        num_clusters = max(labels) + 1  # Assuming `labels` start from 0
+
+    # Use fcluster to determine cluster assignments
+    cluster_assignments = fcluster(Z, num_clusters, criterion='maxclust')
+
+    # Generate a color mapping for clusters
+    unique_clusters = np.unique(cluster_assignments)
+    cluster_color_map = {cluster: f'C{i}' for i, cluster in enumerate(unique_clusters)}
+
     # Create a mapping from numeric index to label
     label_mapping = {i: header for i, (header, _) in enumerate(sequences)}
     label_list = [label_mapping[i] for i in range(len(sequences))]
 
-    # Generate dendrogram
+    # Generate dendrogram with colors
     plt.figure(figsize=(12, 6))
-    dendrogram(Z, labels=label_list, leaf_rotation=90, leaf_font_size=8, color_threshold=Z[-5, 2])  # Adjust colors dynamically
-    
+    dendrogram(
+        Z, labels=label_list, leaf_rotation=90, leaf_font_size=8,
+        color_threshold=Z[-(num_clusters - 1), 2],  # Auto-select color threshold
+        above_threshold_color='black'  # Unclustered parts remain black
+    )
+
     plt.title(f'Hierarchical Clustering Dendrogram ({linkage_method} linkage)')
     plt.xlabel('Samples')
     plt.ylabel('Distance')
+    plt.xticks([]) 
+    # Generate a legend for cluster colors
+    handles = [plt.Line2D([0], [0], color=color, lw=4) for color in cluster_color_map.values()]
+    plt.legend(handles, [f'Cluster {c-1}' for c in unique_clusters], title="Clusters", loc='upper right')
 
     # Save and encode the dendrogram
     buffer = BytesIO()
@@ -118,4 +137,4 @@ def hierarchical_clustering(X_pca, labels, sequences, linkage_method='ward'):
     dendrogram_plot = base64.b64encode(buffer.getvalue()).decode('utf-8')
     plt.close()
 
-    return sorted_clusters,dendrogram_plot
+    return sorted_clusters, dendrogram_plot

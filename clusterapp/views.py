@@ -100,7 +100,7 @@ class ClusterResultsView(DetailView):
                 linkage_matrix = sch.linkage(X_pca, method="centroid")
                 labels = sch.fcluster(linkage_matrix, t=n_clusters, criterion="maxclust")
                 labels -= labels.min() 
-                context['clusters'], context['cluster_plot'] = hierarchical_clustering(X_pca, labels, sequences, linkage_method= "centroid")
+                context['clusters'], context['cluster_plot'] = hierarchical_clustering(X_pca, labels, sequences, linkage_method= "centroid", n_clusters = n_clusters)
             else:
                 linkage_name = "hier_" + fasta.linkage
                 #model = AgglomerativeClustering(n_clusters=n_clusters, linkage=fasta.linkage)
