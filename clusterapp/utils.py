@@ -77,7 +77,7 @@ def kmeans_clustering(X_pca, labels, sequences, n_clusters=3):
     for cluster_id in unique_clusters:
         plt.scatter(X_pca[labels == cluster_id, 0], X_pca[labels == cluster_id, 1], label=f'Cluster {cluster_id}')
     
-    plt.title('K-Means Protein Clusters')
+    plt.title('Scatter Plot of Clusters')
     plt.legend()
 
     # Save and encode the plot
